@@ -42,15 +42,19 @@ climate_data <- readr::read_delim(
 sechselaeuten <- left_join(x = burn_duration, y = climate_data, by = join_by(year)) |> 
   mutate(record = ifelse(tre200m0 >= 19, TRUE, FALSE))
 
+write_csv(x = sechselaeuten, file = "clean_sechselaeuten.csv")
+
 ## plot ----
-p <- ggplot(data = sechselaeuten, mapping = aes(x = duration, y = tre200m0)) +
+boeoeg_caption <- "Schmuki D., Weigel A. 2006. Historical and modern seasonal forecasting: Comparison of the 'Summer Forecast' of Zurich's Boeoegg with a Dynamic Climate Model. Work Report of MeteoSwiss No. 213."
+
+p1 <- ggplot(data = sechselaeuten, mapping = aes(x = duration, y = tre200m0)) +
   geom_point(size = 1.5, colour = "black") +
   geom_smooth(method = "lm", formula = "y ~ x", se = FALSE, colour = "#3d348b") +
   geom_smooth(method = "lm", formula = "y ~ x", se = TRUE, colour = "#7678ed") +
   geom_text(
     data = filter(sechselaeuten, record == TRUE), 
     mapping = aes(x = duration, y = tre200m0, label = year), 
-    colour = "#d90429",
+    colour = "firebrick",
     position = position_jitter(width = 0.5, height = 0.5)
   ) +
   scale_x_continuous(breaks = seq(0, 60, 10), limits = c(0, 60)) +
@@ -59,10 +63,11 @@ p <- ggplot(data = sechselaeuten, mapping = aes(x = duration, y = tre200m0)) +
     title = "Can an exploding snowman predict the summer season?",
     subtitle = "Zurich's Boeoeg as a weather oracle, 1923-2025",
     x = "Duration until head exploded (minutes)", 
-    y = "Average summer temperature (°C)"
+    y = "Average summer temperature (°C)",
+    caption = str_wrap(boeoeg_caption)
   ) +
   theme_bw(base_size = 12)
 
-print(p)  
+print(p1)  
 
-ggsave(filename = "sechselaeuten.png", plot = p, path = ".", width = 14, height = 14, units = "cm", bg = "white")
+ggsave(filename = "fig_sechselaeuten.png", plot = p1, path = ".", width = 16, height = 18, units = "cm", bg = "white")
